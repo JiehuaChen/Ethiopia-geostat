@@ -5,15 +5,28 @@ library(proj4)
 library(rgdal)
 library(raster)
 
-fieldfolder <- "../../../Fielddata/"
+fielddata_folder <- "../../../Fielddata"
 
-fdat <- read.table(paste(fieldfolder, "ET_field_data.csv", sep=""), header=T, sep=",")
 
-### Define grid "coordinate reference system" (CRS)
-# e.g. project to Africa LAEA
-fdat.laea <- as.data.frame(project(cbind(fdat$Lon, fdat$Lat), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
-colnames(fdat.laea) <- c("x","y")
-fdat <- cbind(fdat, fdat.laea)
+fdat <- read.table(paste(fielddata_folder, "/ET_field_data.csv", sep=""), header=T, sep=",")
+
+field <- read.table(paste(fielddata_folder, "/ethiopia_usaid.csv", sep=""), header=T, sep=",")# field data
+field <- as.data.frame(field)
+
+# delete points falling out of ethiopia boundary
+field <- field[field$X>30, ]
+field <- aggregate(CULTIVATION~X+Y, field, mean)
+
+field <- rbind(field, cbind(X=fdat$Lon, Y=fdat$Lat, CULTIVATION = fdat$CMA))
+
+# project Lat/Lon profile coordinates in to the LAEA CRS of "etgrid"
+coordinates(field) = ~ X+Y # assign coordinates; #proj4string(top.soil) = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+proj4string(field) = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") ## +init=epsg:32637" #for transformation, we use the funcrion
+# reproject it into lambert
+lab_field.laea <- spTransform(field, CRS=CRS("+proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
+coordnames(lab_field.laea)<- c("x", "y")
+
+fdat <- cbind(field, fdat.laea)
 
 ### Specify grid cell ID's (GID's) and center point coordinates
 # Define pixel resolution (res.pixel, in m)
