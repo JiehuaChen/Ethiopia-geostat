@@ -106,7 +106,6 @@ predlogP <- lmresult.P$fit +krige.P.resi$pred.resi
 
 # change to original value
 krige.P.resi$RKpred.P<-exp(predlogP)
-#sidat1.ov$RKpred.P<-exp(predlogP)
 
 # to understand the variance of prediction, we can see lower and upper limits of prediction as alternative of variance map (var1.var)
 alpha<-0.05 # this is 95% confidence level.
