@@ -1,56 +1,49 @@
-library(gstat)
-
-# preexisted data: predict_grid_1k, lab_field.laea
+# preexisted data: rmap_bndry, lab_field.laea
+library(BayesTree)
 
 soil_property <- "P"
-map_folder <- "~/ethiosis/map_results/"
+map_folder <- "/Users/jiehuachen/Documents/research/afsis/Ethiopia/datasets/predicted_maps/"
 
 # estimate linear model
 covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
 X_lm <- t(do.call("rbind", lab_field.laea@data[, names(lab_field.laea@data)%in%covariates.names]))
-Y_lm <- log(lab_field.laea[soil_property]@data[[1]])
+Y_lm <- log(lab_field.laea[soil_property]@data[[1]]+1)
 lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm), ]
 X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm), ]
-Y_lm <- log(lab_field.laea[soil_property]@data[[1]])
-
-lm.P<-lm(Y_lm~ X_lm + x + y, data=lab_field.laea)
-summary(lm.P)
-stepAIC(lm.P)
-
-# stepAIC selected covariates for Boron are then
-variable_included <- c("bio1", "bio12")
-
-lm.P2 <-lm(Y_lm ~ bio1 + bio12+ x + y, data=lab_field.laea) # stepAIC drops  rfl_blue_1
-bestmodel<-lm.P2  # excluding rfl_blue_1_new1
-summary(bestmodel)
+Y_lm <- log(lab_field.laea[soil_property]@data[[1]]+1)
 
 
-#make data frame with candidate predictors (full model), and soil variable of interest
-d <- subset(x=lab_field.laea, select = c(variable_included, "x", "y", soil_property))
-d <- na.omit(d) # this can drop the NA values
-#Add model residuals to d
-d$P.fit <- predict(bestmodel, data=d)
-d$P.resi <- Y_lm-d$P.fit
-lab_field.laea$P.resi<-d$P.resi
 
-#add projection attributes to d (saved in beginning of this script)
+# prepare predictions covariates
 
-proj4string(d) <- (lab_field.laea)@proj4string@projargs
-proj4string(rmap_bndry) <- (lab_field.laea)@proj4string@projargs
+load("Gtif_1k.RData")
 
-#remove points with exactly same coordinates
-ids<-zerodist(d)
-if(dim(ids)[1]>0){
-	d<-d[--c(ids[,1], ids[, 2]),]
-}
+# prepare prediction covariates with no missing data
+
+predict_grid_1k_values <- predict_grid_1k@data[, -1]
+predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif@data$band1)==1&!is.na(predict_grid_1k_tif@data$band1), ]
+predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_grid_1k_values)), ]
+predict_grid_1k_values.narm <- predict_grid_1k_values.narm[, colnames(X_lm)]
+predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
+predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
+
+bart.est <- bart(X_lm, Y_lm, x.test = predict_grid_1k_values.narm, sigquant=0.9, k=2, ntree=50, ndpost=100, nskip=100)
+
+predict.bart.mean <-  bart.est$yhat.test.mean
+predict.bart.sd <- apply(bart.est$yhat.test, 2, sd)
+
+
+# add the residuals of BART into the dataframe
+
+lab_field.laea@data["bart.resi"] <- Y_lm - bart.est$yhat.train.mean
 
 ## STEP TWO: variogram for residuals ____________________________________
 #compute exprimental variogram of model residuals
-vg.P.resi <- variogram(P.resi ~ 1, data = d, cutoff=100E3)
+vg.P.resi <- variogram(bart.resi ~ 1, data = lab_field.laea, cutoff=30E3)
 plot(vg.P.resi)
 
 #fit variogram model for residuals
-vgmf.P.resi.sph<- fit.variogram(vg.P.resi, model = vgm(psill = 0.02, model = "Sph", range = 30E3, nugget = 0.01))
+vgmf.P.resi.sph<- fit.variogram(vg.P.resi, model = vgm(psill = 0.3, model = "Sph", range = 30E3, nugget = 1))
 plot(vg.P.resi,vgmf.P.resi.sph, main="sph")
 str(vgmf.P.resi.sph) #"SSErr"= num  1.26e-06
 
@@ -62,30 +55,14 @@ vgmf.P.resi.gau<- fit.variogram(vg.P.resi, model = vgm(psill =0.02, model = "Gau
 plot(vg.P.resi,vgmf.P.resi.gau, main="gau")
 str(vgmf.P.resi.gau) #"SSErr"= num 1.94e-06
 
-#____________________________________________________
 
-
-# STEP THREE: predict P by using fitted the model (the bestmodel) selected from the 
-# stepAIC _____________________
-
-
-lmresult.P<-predict.lm(bestmodel, newdata =rmap_bndry, se.fit = TRUE, data=d) # se.fit is the confidence interval 
-str(lmresult.P)
-lmresult.P <- na.omit(lmresult.P)
-
-#sidat1.ov$lmpred.P<-lmresult.P$fit
-#spplot(lmpred.P, main="lmPred")
-
-#head(sidat1.ov)
-#View(sidat1.ov)
 
 #Now interpolate model residuals by simple kriging to the nodes of the grid.
 #Simple kriging means that we know the model mean (mu), which is in this case 0.
-
-
-krige.P.resi<- krige(P.resi ~1, d, newdata=rmap_bndry, model = vgmf.P.resi.exp, nmax = 100, beta=0, na.action=na.omit)
-# beta=0 means simple kriging since we know the mean, we donot assume mean is constant for residuals.
-# spplot(krige.P.resi, main= "krige.P.resi")
+predict_grid_1k_coords <- as.data.frame(predict_grid_1k_coords)
+coordinates(predict_grid_1k_coords) =~x+y
+predict_grid_1k_coords@proj4string@projargs <- "+proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
+krige.P.resi<- krige(bart.resi ~1, lab_field.laea, newdata=predict_grid_1k_coords, model = vgmf.P.resi.sph, nmax = 100, beta=0, na.action=na.omit)
 
 
 #Copy the kriging results to the SpatialPixelsDataFrame map_prediction
@@ -98,19 +75,14 @@ krige.P.resi$variance.resi<- krige.P.resi$var1.var
 
 #Compute the final prediction by adding the regression model prediction and the interpoalted residual
 
-predlogP <- lmresult.P$fit +krige.P.resi$pred.resi
-
-
-# to plot
-# ggplot()+  geom_raster(data=sidat1.ov, mapping=aes(x=x, y=y, fill=predlogP))+  coord_equal()
-
+predlogP <- predict.bart.mean +krige.P.resi$pred.resi
 # change to original value
 krige.P.resi$RKpred.P<-exp(predlogP)
 
 # to understand the variance of prediction, we can see lower and upper limits of prediction as alternative of variance map (var1.var)
 alpha<-0.05 # this is 95% confidence level.
-loglower<-predlogP - qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(lmresult.P$se.fit^2+ krige.P.resi$var1.var)
-logupper<-predlogP + qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(lmresult.P$se.fit^2+ krige.P.resi$var1.var)
+loglower<-predlogP - qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(predict.bart.sd^2+ krige.P.resi$var1.var)
+logupper<-predlogP + qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(predict.bart.sd^2+ krige.P.resi$var1.var)
 
 
 #predlogP$RK.var.P<-exp(predlogP$variance.resi)
@@ -125,13 +97,11 @@ krige.P.resi$RKupper<-exp(logupper)
 
 setwd(map_folder)
 
-# name convensions: (prediction method)_(property predicted)_(statistics predicted)_(unit of the predictions)_(version of data which the predictions are based on).tif
-
 predlogP.new <- krige.P.resi
 gridded(predlogP.new)<-TRUE
 writeGDAL (
   dataset=predlogP.new["RKupper"],
-  fname=paste("linear+rk.",soil_property,"_new.tif", sep=""),
+  fname=paste("rkupper.",soil_property,"_new.tif", sep=""),
   drivername= "GTiff",
   type="Float32")
 
