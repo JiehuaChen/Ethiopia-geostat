@@ -12,8 +12,6 @@ lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm), ]
 X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm), ]
 Y_lm <- log(lab_field.laea[soil_property]@data[[1]]+1)
 
-
-
 # prepare predictions covariates
 
 load("Gtif_1k.RData")
