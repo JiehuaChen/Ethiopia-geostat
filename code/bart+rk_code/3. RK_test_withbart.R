@@ -2,7 +2,7 @@
 library(BayesTree)
 
 soil_property <- "P"
-map_folder <- "/Users/jiehuachen/Documents/research/afsis/Ethiopia/datasets/predicted_maps/"
+map_folder <- "~/ethiosis/map_results/"
 
 # estimate linear model
 covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
