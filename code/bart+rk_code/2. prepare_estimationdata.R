@@ -26,9 +26,9 @@ if(dim(ids)[1]>0){
 # extract covariates for lab data locations
 setwd(gtifdata_folder)
 
-
-grid.list <- c("BLUE.tif","CTI.tif", "ELEV.tif", "EVI.tif", "LAI.tif", "LCOV.tif", "LSTd.tif", "LSTn.tif","MAP.tif", "MAT.tif", "MFI.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "NPP.tif","RED.tif", "RELIEF.tif")
+grid.list <- c("BLUE.tif", "BSAn.tif", "BSAs.tif", "BSAv.tif", "CTI.tif", "ELEV.tif", "EVI.tif", "FPAR.tif", "LAI.tif", "LSTd.tif", "LSTn.tif", "MAP.tif", "MAT.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "RED.tif", "RELIEF.tif", "WSAn.tif", "WSAs.tif", "WSAv.tif")
  
+
 for (i in 1:length(grid.list)) {
 	print(paste("extracting", grid.list[i]))
 	rmap_bndry_new <- raster(grid.list[i]) # raster is producing small file size in the memory as compared to readGDAL

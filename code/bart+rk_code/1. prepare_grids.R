@@ -11,12 +11,12 @@ rm(list=ls())
 gtiffolder <- "~/ethiosis/GEOdata/" 
 
 # covariates interested   
-grid.list <- c("BLUE.tif","CTI.tif", "ELEV.tif", "EVI.tif", "LAI.tif", "LCOV.tif", "LSTd.tif", "LSTn.tif","MAP.tif", "MAT.tif", "MFI.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "NPP.tif","RED.tif", "RELIEF.tif")
+grid.list <- c("BLUE.tif", "BSAn.tif", "BSAs.tif", "BSAv.tif", "CTI.tif", "ELEV.tif", "EVI.tif", "FPAR.tif", "LAI.tif", "LSTd.tif", "LSTn.tif", "MAP.tif", "MAT.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "RED.tif", "RELIEF.tif", "WSAn.tif", "WSAs.tif", "WSAv.tif")
  
 
 # read in the prediction grids, and attach covariates in it
 setwd(gtiffolder)
-predict_grid_1k <- readGDAL("predgrid_1k.tif")
+
 
 # only keep the locations which is not cliped
 predict_grid_1k_coords <- coordinates(predict_grid_1k)[as.numeric(predict_grid_1k@data$band1)==1&!is.na(predict_grid_1k@data), ]
@@ -36,13 +36,16 @@ for(i in 1:length(grid.list)){
   	y = predict_grid_1k, # original data
   	method = "simple"
 	)
-#	writeGDAL(
- # 	dataset = rmap_bndry[strsplit(grid.list[i], split=".tif")[[1]]],
- # 	fname = paste(strsplit(grid.list[i], split=".tif")[[1]], "_new.tif", sep=""),
- # 	drivername = "GTiff",
- # 	type = "Float32",
- # 	Overwrite<- TRUE)
 }
+
+predict_grid_1k_values <- predict_grid_1k@data[, -1]
+predict_grid_1k_tif <- readGDAL("pred_grid_1K.tif")
+predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif@data$band1)==1&!is.na(predict_grid_1k_tif@data$band1), ]
+predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_grid_1k_values)), ]
+predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
+predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
+
+write.table(predict_grid_1k_values.narm, "predcov.txt", row.names=FALSE, quote=FALSE, col.names=FALSE)
 
 
 
