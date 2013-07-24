@@ -10,6 +10,7 @@ rm(list=ls())
 # folder contraining all the covariates tif files
 gtiffolder <- "~/ethiosis/GEOdata/" 
 
+gtiffolder <- "/Users/jiehuachen/Documents/research/afsis/Ethiopia/git/GEOdata.git/ET_1k_Gtif"
 # covariates interested   
 grid.list <- c("BLUE.tif", "BSAn.tif", "BSAs.tif", "BSAv.tif", "CTI.tif", "ELEV.tif", "EVI.tif", "FPAR.tif", "LAI.tif", "LSTd.tif", "LSTn.tif", "MAP.tif", "MAT.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "RED.tif", "RELIEF.tif", "WSAn.tif", "WSAs.tif", "WSAv.tif")
  
@@ -19,7 +20,8 @@ setwd(gtiffolder)
 
 
 # only keep the locations which is not cliped
-predict_grid_1k_coords <- coordinates(predict_grid_1k)[as.numeric(predict_grid_1k@data$band1)==1&!is.na(predict_grid_1k@data), ]
+predict_grid_1k_tif <- readGDAL("pred_grid_1K.tif")
+predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif@data$band1)==1&!is.na(predict_grid_1k_tif@data$band1), ]
 
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
@@ -39,8 +41,7 @@ for(i in 1:length(grid.list)){
 }
 
 predict_grid_1k_values <- predict_grid_1k@data[, -1]
-predict_grid_1k_tif <- readGDAL("pred_grid_1K.tif")
-predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif@data$band1)==1&!is.na(predict_grid_1k_tif@data$band1), ]
+
 predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_grid_1k_values)), ]
 predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
 predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]

@@ -2,6 +2,7 @@ labdata_folder <- "~/ethiosis/LABdata"
 gtifdata_folder <- "~/ethiosis/GEOdata"
 
 # read in the lab data
+labdata_folder <- "/Users/jiehuachen/Documents/research/afsis/Ethiopia/git/LABdata.git/"
 setwd(labdata_folder)
 
 lab <- read.table("Samples.csv", header=T, sep=",") # lab data
@@ -24,7 +25,7 @@ if(dim(ids)[1]>0){
 #save(lab_field.laea, file="lab_field.laea.RData")
 
 # extract covariates for lab data locations
-setwd(gtifdata_folder)
+setwd(gtiffolder)
 
 grid.list <- c("BLUE.tif", "BSAn.tif", "BSAs.tif", "BSAv.tif", "CTI.tif", "ELEV.tif", "EVI.tif", "FPAR.tif", "LAI.tif", "LSTd.tif", "LSTn.tif", "MAP.tif", "MAT.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "RED.tif", "RELIEF.tif", "WSAn.tif", "WSAs.tif", "WSAv.tif")
  

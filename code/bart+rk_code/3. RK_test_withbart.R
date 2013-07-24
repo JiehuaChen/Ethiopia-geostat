@@ -8,10 +8,9 @@ map_folder <- "~/ethiosis/map_results/"
 covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
 X_lm <- t(do.call("rbind", lab_field.laea@data[, names(lab_field.laea@data)%in%covariates.names]))
 Y_lm <-  lab_field.laea[soil_property]@data[[1]]
-lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm), ]
-X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm), ]
+lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
+X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
 Y_lm <- lab_field.laea[soil_property]@data[[1]]
-Y_lm <- ifelse(Y_lm==0, 0.5, Y_lm)
 Y_lm <- log(Y_lm)
 
 # prepare prediction covariates with no missing data
