@@ -1,7 +1,7 @@
 # preexisted data: rmap_bndry, lab_field.laea
 library(BayesTree)
-
-soil_property <- "pH"
+library(gstat)
+soil_property <- "Fe"
 cv_results <- results25.sse[results25.sse[,1]==soil_property, ]
 ntree.est <- 25
 sigdf.est <- as.numeric(cv_results[2])
@@ -76,6 +76,7 @@ krige.P.resi$variance.resi<- krige.P.resi$var1.var
 
 predlogP <- bart.predict.mean +krige.P.resi$pred.resi
 # change to original value
+krige.P.resi$RKpred_log <- predlogP
 krige.P.resi$RKpred<-exp(predlogP)
 
 # to understand the variance of prediction, we can see lower and upper limits of prediction as alternative of variance map (var1.var)
@@ -86,7 +87,7 @@ logupper<-predlogP + qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(bart.predict.sd^2+ krig
 #compute the variance of the regression+kriging prediction error by adding the regression prediction error variance and the kriging variace of the residuals
 krige.P.resi$RKlower<-exp(loglower)
 krige.P.resi$RKupper<-exp(logupper)
-
+krige.P.resi$se_log <- sqrt(bart.predict.sd^2+ krige.P.resi$var1.var)
 setwd(map_folder)
 #linear+rk_N_upper_ppm_20130626.tif
 predlogP.new <- krige.P.resi
@@ -94,23 +95,36 @@ gridded(predlogP.new)<-TRUE
 
 writeGDAL (
   dataset=predlogP.new["RKupper"],
-  fname=paste("bart+rk_",soil_property,"_upper_ppm_20130614.tif", sep=""),
+  fname=paste("bart+rk_",soil_property,"_upper_ppm_20130726.tif", sep=""),
   drivername= "GTiff",
   type="Float32")
 
 
 writeGDAL (
   dataset=predlogP.new["RKlower"],
-  fname=paste("bart+rk_",soil_property,"_lower_ppm_20130614.tif", sep=""),
+  fname=paste("bart+rk_",soil_property,"_lower_ppm_20130726.tif", sep=""),
   drivername= "GTiff",
   type="Float32")
 
 
 writeGDAL (
   dataset=predlogP.new["RKpred"],
-  fname=paste("bart+rk_",soil_property,"_mean_ppm_20130614.tif", sep=""),
+  fname=paste("bart+rk_",soil_property,"_mean_ppm_20130726.tif", sep=""),
   drivername= "GTiff",
   type="Float32")
 
+
+writeGDAL (
+  dataset=predlogP.new["RKpred_log"],
+  fname=paste("bart+rk_",soil_property,"_mean_log_ppm_20130726.tif", sep=""),
+  drivername= "GTiff",
+  type="Float32")
+
+
+writeGDAL (
+  dataset=predlogP.new["se_log"],
+  fname=paste("bart+rk_",soil_property,"_se_log_ppm_20130726.tif", sep=""),
+  drivername= "GTiff",
+  type="Float32")
 
 
