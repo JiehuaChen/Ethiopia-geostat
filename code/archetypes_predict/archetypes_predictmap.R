@@ -28,7 +28,7 @@ pcplot(idata)
 
 ### Identification of compositional archetypes / endmembers
 set.seed(20513)
-cdata.arc <- stepArchetypes(data=cdata, k=1:6, nrep=5, verbose=T)
+cdata.arc <- stepArchetypes(data=cdata, k=1:10, nrep=5, verbose=T)
 screeplot(cdata.arc)
 
 # Select no. of archetypes, screeplot suggests k=7
