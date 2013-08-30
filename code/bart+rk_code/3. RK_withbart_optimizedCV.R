@@ -1,15 +1,17 @@
-# preexisted data: rmap_bndry, lab_field.laea
+# preexisted data: 
+
 library(BayesTree)
 library(gstat)
 soil_property <- "Fe"
+
 cv_results <- results25.sse[results25.sse[,1]==soil_property, ]
 ntree.est <- 25
 sigdf.est <- as.numeric(cv_results[2])
 sigquant.est <- as.numeric(cv_results[3])
 k.est <- as.numeric(cv_results[4])
 
-map_folder <- "~/ethiosis/map_results/"
-map_folder <- "/Users/jiehuachen/Documents/research/afsis/Ethiopia/git/spatial.git/code/bart+rk_code/map_results/"
+map_folder <- "../map_results/"
+
 # estimate linear model
 covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
 X_lm <- t(do.call("rbind", lab_field.laea@data[, names(lab_field.laea@data)%in%covariates.names]))
@@ -21,12 +23,12 @@ Y_lm <- log(Y_lm)
 
 
 # prepare prediction covariates with no missing data
-source("/Users/jiehuachen/Documents/research/afsis/Spectrum/bart_code/bartfunc.R")
-source("/Users/jiehuachen/Documents/research/afsis/Spectrum/bart_code/makeind.R")
+source("bartfunc.R")
+source("makeind.R")
 
-dyn.load("/Users/jiehuachen/Documents/research/afsis/Spectrum/bart_code/bart/src/mbart.so")
+dyn.load("src/mbart.so")
 
-setwd("/Users/jiehuachen/Documents/research/afsis/Ethiopia/git/spatial.git/code/bart+rk_code/MCMC_results")
+setwd("MCMC_results")
 
 
 bart.est <- bart_saveresults(X_lm, Y_lm, sigdf=sigdf.est, sigquant=sigquant.est, k=k.est, ntree=ntree.est, ndpost=500, nskip=10000, keepevery=10)
