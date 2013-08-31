@@ -62,7 +62,7 @@ bart.est <- bart_saveresults(X_lm, Y_lm, sigdf=sigdf.est, sigquant=sigquant.est,
 
 cat("Step 4.1: Prediction from the estimated BART model \n")
 # bart prediction
-xdat.dir <- paste("../../../../GEOdata/ET_1k_Gtif/", "predcov.txt", sep="")
+xdat.dir <- paste("../","predcov.txt", sep="")
 MCMCresults.dir <- paste("", "MCMC*.txt", sep="")
 rgy.dir <- paste("", "rgy.txt", sep="")
 pipe_run <- (pipe(paste("../src_prediction/predict -x ", xdat.dir, " -f ", "\"", MCMCresults.dir, "\"", " -s \" \" -r ", rgy.dir," -o predictedY.txt", sep="")))
