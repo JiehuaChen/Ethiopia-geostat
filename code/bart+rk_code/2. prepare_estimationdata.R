@@ -1,12 +1,8 @@
-labdata_folder <- "~/ethiosis/LABdata"
-gtifdata_folder <- "~/ethiosis/GEOdata"
+labdata_folder <- "../../../LABdata"
 
 # read in the lab data
-labdata_folder <- "/Users/jiehuachen/Documents/research/afsis/Ethiopia/git/LABdata.git/"
-setwd(labdata_folder)
-
-lab <- read.table("Samples.csv", header=T, sep=",") # lab data
-field <- read.table("Profiles.csv", header=T, sep=",")# field data
+lab <- read.table(paste(labdata_folder,"/Samples.csv", sep=""), header=T, sep=",") # lab data
+field <- read.table(paste(labdata_folder, "/Profiles.csv", sep=""), header=T, sep=",")# field data
 lab_field <- merge(lab, field, by="PID")
 
 # project Lat/Lon profile coordinates in to the LAEA CRS of "etgrid"
@@ -25,20 +21,17 @@ if(dim(ids)[1]>0){
 #save(lab_field.laea, file="lab_field.laea.RData")
 
 # extract covariates for lab data locations
-setwd(gtiffolder)
-
 grid.list <- c("BLUE.tif", "BSAn.tif", "BSAs.tif", "BSAv.tif", "CTI.tif", "ELEV.tif", "EVI.tif", "FPAR.tif", "LAI.tif", "LSTd.tif", "LSTn.tif", "MAP.tif", "MAT.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "RED.tif", "RELIEF.tif", "WSAn.tif", "WSAs.tif", "WSAv.tif")
  
 
 for (i in 1:length(grid.list)) {
-	print(paste("extracting", grid.list[i]))
-	rmap_bndry_new <- raster(grid.list[i]) # raster is producing small file size in the memory as compared to readGDAL
+	cat(paste("extracting", grid.list[i], "\n"))
+	rmap_bndry_new <- raster(paste(gtiffolder, "/", grid.list[i], sep=""))
 	lab_field.laea@data[strsplit(grid.list[i], split=".tif")[[1]]] <- extract (
-  	x = rmap_bndry_new, # evi data 
+  	x = rmap_bndry_new, # grid data
   	y = lab_field.laea, # original data
   	method = "simple"
 	)
 }
-lab_field.laea@data["x"] <- lab_field.laea@coords[, "x"]
-lab_field.laea@data["y"] <- lab_field.laea@coords[, "y"]
+
 
