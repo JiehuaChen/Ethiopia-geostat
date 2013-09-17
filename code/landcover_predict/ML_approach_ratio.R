@@ -85,8 +85,8 @@ for(j in 1:9){
 }
 
 # predict CMA
-cma_data <- cbind(CMA= fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
-cma_data <- na.omit(cma_data)
+ratio_data <- cbind(= fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
+ratio_data <- na.omit(ratio_data)
 #cma_data <- aggregate(cma_data, by=list(fdat.gid$GID), rowMeans)
 # library(randomForest)
 
@@ -110,13 +110,20 @@ cma_data <- na.omit(cma_data)
 # BART prediction
 library(BayesTree)
 
-x <- cma_data[,-1]
-y <- cma_data[,1]
+x <- ratio_data[,-1]
+y <- ratio_data[,1]
 
 bart.est <- bart(x, y, ndpost=500, nskip=2000, keepevery=10)
 
-predict.bart.mean <-  apply(pnorm(bart.est$yhat.test),2,mean)
-predict.bart.sd <- apply(pnorm(bart.est$yhat.test), 2, sd)
+predict.bart <- bart.est$yhat.test
+for(i in 1:dim(predict.bart)[1]){
+	for(j in 1:dim(predict.bart)[2]){
+		predict.bart[i, j] <- ifelse(predict.bart[i, j]>1, 1, ifelse(predict.bart[i, j]<0, 0, predict.bart[i, j]))
+	}
+}
+
+predict.bart.mean <-  apply(predict.bart,2,mean)
+predict.bart.sd <- apply(predict.bart, 2, sd)
 
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
