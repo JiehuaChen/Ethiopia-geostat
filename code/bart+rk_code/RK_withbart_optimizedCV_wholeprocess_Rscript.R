@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --vanilla
+#!/usr/local/lib64/R/bin/Rscript --vanilla
 
 
 # clean R workspace
