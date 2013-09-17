@@ -16,15 +16,15 @@ grid.list.loc <- paste(gtiffolder, grid.list, sep="")
 
 
 
-predict_grid_1k <- readGDAL(paste(gtiffolder, "pred_grid_1K.tif", sep=""))
-predict_grid_1k <- coordinates(predict_grid_1k)
+predict_grid_1k_tif <- readGDAL(paste(gtiffolder, "/", "pred_grid_1K.tif", sep=""), silent=TRUE)
+
+predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif@data$band1)==1&!is.na(predict_grid_1k_tif@data$band1), ]
+
 predict_grid_1k <- SpatialPointsDataFrame(
-  coords = predict_grid_1k,
+  coords = predict_grid_1k_coords,
   data = data.frame(
-    woreda = rep(x = "woreda", times = nrow(predict_grid_1k))
-  )
+    mask = rep(1, dim(predict_grid_1k_coords)[1]))
 )
-  
 
 nm <- grid.list.loc[1]
 
@@ -55,7 +55,7 @@ for(i in 1:9){
 }
 colnames(pred_locations_gid) <- c("2nb1x","2nb1y" ,"1nb1x", "1nb1y", "2nb2x", "2nb2y", "1nb2x", "1nb2y","locx", "locy", "1nb3x", "1nb3y", "2nb3x", "2nb3y", "1nb4x", "1nb4y", "2nb4x", "2nb4y")
 for(j in 1:9){
-	temp <- cbind(predict_grid_1k$woreda, x=pred_locations_gid[, (2*j-1)], y = pred_locations_gid[, (2*j)])
+	temp <- cbind(predict_grid_1k$mask, x=pred_locations_gid[, (2*j-1)], y = pred_locations_gid[, (2*j)])
 	temp <- as.data.frame(temp)
 	coordinates(temp) = ~ x+y
 grid.list <- c("BLUE.tif","CTI.tif", "ELEV.tif", "EVI.tif", "LAI.tif", "LCOV.tif", "LSTd.tif", "LSTn.tif","MAP.tif", "MAT.tif", "MFI.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "NPP.tif","RED.tif", "RELIEF.tif")
@@ -71,5 +71,12 @@ grid.list <- c("BLUE.tif","CTI.tif", "ELEV.tif", "EVI.tif", "LAI.tif", "LCOV.tif
 	}
 	predict_grid_1k <- cbind(predict_grid_1k, temp@data[,-1])
 }
+
+predict_grid_1k_values <- predict_grid_1k[, -(1:3)]
+predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_grid_1k_values)), ]
+predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
+predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
+
+write.table(predict_grid_1k_values.narm, paste(gtiffolder, "predcov.txt", sep=""), row.names=FALSE, quote=FALSE, col.names=FALSE)
 
 
