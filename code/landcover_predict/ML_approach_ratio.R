@@ -85,7 +85,7 @@ for(j in 1:9){
 }
 
 # predict CMA
-ratio_data <- cbind(= fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
+ratio_data <- cbind(fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
 ratio_data <- na.omit(ratio_data)
 #cma_data <- aggregate(cma_data, by=list(fdat.gid$GID), rowMeans)
 # library(randomForest)
@@ -115,6 +115,9 @@ y <- ratio_data[,1]
 
 bart.est <- bart(x, y, ndpost=500, nskip=2000, keepevery=10)
 
+save.image("bart.est.RData")
+
+
 predict.bart <- bart.est$yhat.test
 for(i in 1:dim(predict.bart)[1]){
 	for(j in 1:dim(predict.bart)[2]){
@@ -136,7 +139,7 @@ gridded(predict_grid_1k) <- TRUE
 
 writeGDAL(
   	dataset = predict_grid_1k["predict.mean"],
-  	fname ="cmapredict.tif",
+  	fname ="erosionpredict.tif",
   	drivername = "GTiff",
   	type = "Float32",
   	Overwrite<- TRUE)
@@ -145,7 +148,7 @@ writeGDAL(
   	  	  	
 writeGDAL(
   	dataset = predict_grid_1k["predict.se"],
-  	fname ="cmapredict_se.tif",
+  	fname ="erosionpredict_se.tif",
   	drivername = "GTiff",
   	type = "Float32",
   	Overwrite<- TRUE)
