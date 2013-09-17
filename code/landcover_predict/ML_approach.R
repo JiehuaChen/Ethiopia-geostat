@@ -186,11 +186,10 @@ predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k
 
 
 
-bart.est <- bart_saveresults(x, y, xtest= predict_grid_1k_values.narm, ndpost=500, nskip=2000, keepevery=10)
+bart.est <- bart(x, y, xtest= predict_grid_1k_values.narm, ndpost=500, nskip=2000, keepevery=10)
 
-
-predict.bart.mean <-  bart.est$yhat.train.mean
-predict.bart.sd <- apply(bart.est$yhat.train, 2, sd)
+predict.bart.mean <-  pnorm(bart.est$yhat.test)
+predict.bart.sd <- apply(pnorm(bart.est$yhat.test), 2, sd)
 
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
@@ -208,12 +207,7 @@ writeGDAL(
   	type = "Float32",
   	Overwrite<- TRUE)
   	
-writeGDAL(
-  	dataset = predict_grid_1k["predict.binary"],
-  	fname ="cmapredict_binary.tif",
-  	drivername = "GTiff",
-  	type = "Int16", 
-  	Overwrite<- TRUE)
+
   	  	  	
 writeGDAL(
   	dataset = predict_grid_1k["predict.se"],
