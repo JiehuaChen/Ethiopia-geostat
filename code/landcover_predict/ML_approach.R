@@ -188,7 +188,7 @@ predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k
 
 bart.est <- bart(x, y, xtest= predict_grid_1k_values.narm, ndpost=500, nskip=2000, keepevery=10)
 
-predict.bart.mean <-  pnorm(bart.est$yhat.test)
+predict.bart.mean <-  apply(pnorm(bart.est$yhat.test),2,mean)
 predict.bart.sd <- apply(pnorm(bart.est$yhat.test), 2, sd)
 
 predict_grid_1k <- SpatialPointsDataFrame(
