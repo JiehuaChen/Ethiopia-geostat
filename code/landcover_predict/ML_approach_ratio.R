@@ -1,5 +1,5 @@
 ########
-# 
+# BART estimation for ratio data
 ########
 library(proj4)
 library(rgdal)
@@ -87,25 +87,10 @@ for(j in 1:9){
 # predict CMA
 ratio_data <- cbind(fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
 ratio_data <- na.omit(ratio_data)
-#cma_data <- aggregate(cma_data, by=list(fdat.gid$GID), rowMeans)
-# library(randomForest)
 
-# cma.rf <- randomForest((CMA) ~ ., data=cma_data, importance=TRUE, proximity=TRUE)
-# tuneRF.cma <- tuneRF(cma_data[,-1], as.factor(cma_data$CMA))
+# load prediction data
+load("GEOdata.RData")
 
-# rfcma.predict <- predict(cma.rf, rmap_bndry[, -c(1, 2, 3)])
-
-# aggregate : does not work well, hard to estimate medium category due to lack of data
-# cma_data <- cbind(CMA=(fdat.gid$CMA), fdat.gid[, 33:167])
-# cma_data_aggregate <- unique(fdat.gid$GID)
-# for(i in 1:dim(cma_data)[2]){
-	# cma_data_aggregate <- cbind(cma_data_aggregate, aggregate(cma_data[,i], by=list(fdat.gid$GID), mean)[,2])
-# }
-# cma_data_aggregate <- as.data.frame(cma_data_aggregate)
-# names(cma_data_aggregate) <- c("GID", names(cma_data))
-
-# cma_data_aggregate$CMA <- ifelse(cma_data_aggregate$CMA==0.5, "medium", ifelse(cma_data_aggregate$CMA>0.5, "high", "low"))
-# cma.rf <- randomForest((CMA) ~ ., data=cma_data_aggregate, importance=TRUE, proximity=TRUE)
 
 # BART prediction
 library(BayesTree)
@@ -131,15 +116,15 @@ predict.bart.sd <- apply(predict.bart, 2, sd)
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
   data = data.frame(
- predict.mean =predict.mean,
- predict.se = predict.se)
+ predict.mean = predict.bart.mean,
+ predict.se = predict.bart.sd)
 )
 
 gridded(predict_grid_1k) <- TRUE
 
 writeGDAL(
   	dataset = predict_grid_1k["predict.mean"],
-  	fname ="erosionpredict.tif",
+  	fname ="/data6/EthiopiaData/erosionpredict.tif",
   	drivername = "GTiff",
   	type = "Float32",
   	Overwrite<- TRUE)
@@ -148,7 +133,7 @@ writeGDAL(
   	  	  	
 writeGDAL(
   	dataset = predict_grid_1k["predict.se"],
-  	fname ="erosionpredict_se.tif",
+  	fname ="/data6/EthiopiaData/erosionpredict_se.tif",
   	drivername = "GTiff",
   	type = "Float32",
   	Overwrite<- TRUE)
