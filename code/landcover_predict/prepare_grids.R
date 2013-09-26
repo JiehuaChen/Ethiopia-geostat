@@ -54,11 +54,11 @@ for(i in 1:9){
 	pred_locations_gid[, (2*i)] <- origin.y - ((pixeln.y+neighbor.y[i])*res.y + res.y/2)
 }
 colnames(pred_locations_gid) <- c("2nb1x","2nb1y" ,"1nb1x", "1nb1y", "2nb2x", "2nb2y", "1nb2x", "1nb2y","locx", "locy", "1nb3x", "1nb3y", "2nb3x", "2nb3y", "1nb4x", "1nb4y", "2nb4x", "2nb4y")
-
 for(j in 1:9){
 	temp <- cbind(predict_grid_1k$mask, x=pred_locations_gid[, (2*j-1)], y = pred_locations_gid[, (2*j)])
 	temp <- as.data.frame(temp)
-	coordinates(temp) = ~ x+y 
+	coordinates(temp) = ~ x+y
+ 
 	for (i in 1:length(grid.list)) {
 		print(paste("extracting", grid.list.loc[i]))
 		predict_grid_1k_new <- raster(grid.list.loc[i]) # raster is producing small file size in the memory as compared to readGDAL
@@ -75,4 +75,7 @@ predict_grid_1k_values <- predict_grid_1k[, -(1:3)]
 predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_grid_1k_values)), ]
 predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
 predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
+
+write.table(predict_grid_1k_values.narm, paste(gtiffolder, "predcov.txt", sep=""), row.names=FALSE, quote=FALSE, col.names=FALSE)
+
 
