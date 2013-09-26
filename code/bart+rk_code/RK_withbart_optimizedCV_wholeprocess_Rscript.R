@@ -1,4 +1,4 @@
-#!/usr/local/lib64/R/bin/Rscript --vanilla
+#!/usr/bin/Rscript --vanilla
 
 
 # clean R workspace
@@ -90,7 +90,7 @@ vgmf.P.resi.exp<- fit.variogram(vg.P.resi, model = vgm(psill =0.02, model = "Exp
 #Simple kriging means that we know the model mean (mu), which is in this case 0.
 predict_grid_1k_coords <- as.data.frame(predict_grid_1k_coords)
 coordinates(predict_grid_1k_coords) =~x+y
-predict_grid_1k_coords@proj4string@projargs <- " +proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
+predict_grid_1k_coords@proj4string@projargs <- "+proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
 krige.P.resi<- krige(bart.resi ~1, lab_field.laea, newdata=predict_grid_1k_coords, model = vgmf.P.resi.exp, nmax = 100, beta=0, na.action=na.omit)
 
 

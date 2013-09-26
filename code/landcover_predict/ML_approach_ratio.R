@@ -7,6 +7,8 @@ library(raster)
 
 fieldfolder <- "../../../Fielddata/"
 
+load("LC.RData")
+
 fdat <- read.table(paste(fieldfolder, "ET_field_data.csv", sep=""), header=T, sep=",")
 
 ### Define grid "coordinate reference system" (CRS)
@@ -85,7 +87,7 @@ for(j in 1:9){
 }
 
 # predict CMA
-ratio_data <- cbind(fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
+ratio_data <- cbind(fdat.gid$DR30/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
 ratio_data <- na.omit(ratio_data)
 #cma_data <- aggregate(cma_data, by=list(fdat.gid$GID), rowMeans)
 # library(randomForest)
@@ -113,7 +115,7 @@ library(BayesTree)
 x <- ratio_data[,-1]
 y <- ratio_data[,1]
 
-bart.est <- bart(x, y, ndpost=500, nskip=2000, keepevery=10)
+bart.est <- bart(x, y, x.test = as.data.frame( predict_grid_1k_values.narm), ndpost=500, nskip=2000, keepevery=10)
 
 save.image("bart.est.RData")
 
@@ -131,8 +133,8 @@ predict.bart.sd <- apply(predict.bart, 2, sd)
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
   data = data.frame(
- predict.mean =predict.mean,
- predict.se = predict.se)
+ predict.mean =predict.bart.mean,
+ predict.se = predict.bart.sd)
 )
 
 gridded(predict_grid_1k) <- TRUE
