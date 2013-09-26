@@ -4,8 +4,6 @@
 library(rgdal) # to import and export spatial data
 library(raster) # for handling raster maps
 
-# clean R workspace
-# rm(list=ls())
 
 # covariates interested   
 
@@ -77,5 +75,6 @@ predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
 predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
 
 write.table(predict_grid_1k_values.narm, paste(gtiffolder, "predcov.txt", sep=""), row.names=FALSE, quote=FALSE, col.names=FALSE)
+save.image("GEOdata.RData")
 
 
