@@ -16,7 +16,7 @@ field <- as.data.frame(field)
 # delete points falling out of ethiopia boundary
 field <- field[field$X>30, ]
 field <- aggregate(CULTIVATION~X+Y, field, mean)
-
+field$CULTIVATION <- ifelse(field$CULTIVATION>0, 1, 0)
 field <- rbind(field, cbind(X=fdat$Lon, Y=fdat$Lat, CULTIVATION = fdat$CMA))
 
 # project Lat/Lon profile coordinates in to the LAEA CRS of "etgrid"
