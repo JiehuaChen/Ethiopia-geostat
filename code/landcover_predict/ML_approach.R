@@ -17,12 +17,12 @@ field <- as.data.frame(field)
 field <- field[field$X>30, ]
 field <- aggregate(CULTIVATION~X+Y, field, mean)
 field$CULTIVATION <- ifelse(field$CULTIVATION>0, 1, 0)
-field <- rbind(field, cbind(X=fdat$Lon, Y=fdat$Lat, CULTIVATION = fdat$CMA))
+fdat <- rbind(field, cbind(X=fdat$Lon, Y=fdat$Lat, CULTIVATION = fdat$CMA))
 
 # project Lat/Lon profile coordinates in to the LAEA CRS of "etgrid"
-field.laea <- as.data.frame(project(cbind(field$X, field$Y), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
+fdat.laea <- as.data.frame(project(cbind(fdat$X, fdat$Y), "+proj=laea +ellps=WGS84 +lon_0=20 +lat_0=5 +units=m +no_defs"))
 colnames(fdat.laea) <- c("x","y")
-fdat <- cbind(field, field.laea)
+fdat <- cbind(fdat, fdat.laea)
 
 ### Specify grid cell ID's (GID's) and center point coordinates
 # Define pixel resolution (res.pixel, in m)
@@ -40,9 +40,9 @@ fdat.gid <- cbind(fdat, GID)
 # get all the neighoring grid locations
 locations_gid <- matrix(NA, dim(fdat.laea)[1], 18)
 
-gtiffolder <- "../../../GEOdata/ET_1k_Gtif_CMA/"
+gtiffolder <- "../../../GEOdata/ET_Gtiff_251013/"
 # covariates interested   
-grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "pred_grid_1K.tif"]
+grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "fPAR_mask.tif"]
 grid.list.loc <- paste(gtiffolder, grid.list, sep="") 
 
 # read in the prediction grids, and attach covariates in it
@@ -94,7 +94,7 @@ for(j in 1:9){
 }
 
 # predict CMA
-cma_data <- cbind(CMA= fdat.gid$CMA, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
+cma_data <- cbind(CMA= fdat.gid$CULTIVATION, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
 cma_data <- na.omit(cma_data)
 #cma_data <- aggregate(cma_data, by=list(fdat.gid$GID), rowMeans)
 # library(randomForest)
@@ -118,7 +118,7 @@ cma_data <- na.omit(cma_data)
 
 # BART prediction
 library(BayesTree)
-load("LC.RData")
+load("GEOdata.RData")
 
 x <- cma_data[,-1]
 y <- cma_data[,1]
