@@ -16,7 +16,7 @@ grid.list.loc <- paste(gtiffolder, grid.list, sep="")
 
 predict_grid_1k_tif <- readGDAL(paste(gtiffolder, "/", "pred_grid_1K.tif", sep=""), silent=TRUE)
 
-predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif@data$band1)==1&!is.na(predict_grid_1k_tif@data$band1), ]
+predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)
 
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
