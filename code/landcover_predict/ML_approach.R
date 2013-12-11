@@ -1,6 +1,7 @@
 ########
 # 
 ########
+
 library(proj4)
 library(rgdal)
 library(raster)
@@ -84,7 +85,7 @@ for(j in 1:9){
 }
 
 # predict CMA
-cma_data <- cbind(CMA= fdat$CMA, fdat[, (dim(fdat)[2]+2):(dim(fdat)[2])])
+cma_data <- cbind(CMA= fdat$CULTIVATION, fdat[, (6:(dim(fdat)[2]))])
 cma_data <- na.omit(cma_data)
 # BART prediction
 library(BayesTree)
