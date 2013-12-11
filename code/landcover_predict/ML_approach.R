@@ -26,15 +26,7 @@ fdat <- cbind(fdat, fdat.laea)
 
 ### Specify grid cell ID's (GID's) and center point coordinates
 # Define pixel resolution (res.pixel, in m)
-res.pixel <- 1000
-
-# GID-definition
-xgid <- ceiling(abs(fdat$x)/res.pixel)
-ygid <- ceiling(abs(fdat$y)/res.pixel)
-gidx <- ifelse(fdat$x<0, paste("W", xgid, sep=""), paste("E", xgid, sep=""))
-gidy <- ifelse(fdat$y<0, paste("S", ygid, sep=""), paste("N", ygid, sep=""))
-GID <- paste(gidx, gidy, sep="-")
-fdat.gid <- cbind(fdat, GID)
+# res.pixel <- 1000
 
 # Gtif data
 # get all the neighoring grid locations
@@ -75,10 +67,8 @@ for(i in 1:9){
 
 colnames(locations_gid) <- c("2nb1x","2nb1y" ,"1nb1x", "1nb1y", "2nb2x", "2nb2y", "1nb2x", "1nb2y","locx", "locy", "1nb3x", "1nb3y", "2nb3x", "2nb3y", "1nb4x", "1nb4y", "2nb4x", "2nb4y")
 
-fdat.gid <- cbind(fdat, GID)
-
 for(j in 1:9){
-	temp <- cbind(fdat.gid[,1], x=locations_gid[, (2*j-1)], y = locations_gid[, (2*j)])
+	temp <- cbind(fdat[,1], x=locations_gid[, (2*j-1)], y = locations_gid[, (2*j)])
 	temp <- as.data.frame(temp)
 	coordinates(temp) = ~ x+y
 	for (i in 1:length(grid.list)) {
@@ -90,32 +80,12 @@ for(j in 1:9){
 		  	method = "simple"
 		 )
 	}
-	fdat.gid <- cbind(fdat.gid, temp@data[,-1])
+	fdat <- cbind(fdat, temp@data[,-1])
 }
 
 # predict CMA
-cma_data <- cbind(CMA= fdat.gid$CULTIVATION, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
+cma_data <- cbind(CMA= fdat$CMA, fdat[, (dim(fdat)[2]+2):(dim(fdat)[2])])
 cma_data <- na.omit(cma_data)
-#cma_data <- aggregate(cma_data, by=list(fdat.gid$GID), rowMeans)
-# library(randomForest)
-
-# cma.rf <- randomForest((CMA) ~ ., data=cma_data, importance=TRUE, proximity=TRUE)
-# tuneRF.cma <- tuneRF(cma_data[,-1], as.factor(cma_data$CMA))
-
-# rfcma.predict <- predict(cma.rf, rmap_bndry[, -c(1, 2, 3)])
-
-# aggregate : does not work well, hard to estimate medium category due to lack of data
-# cma_data <- cbind(CMA=(fdat.gid$CMA), fdat.gid[, 33:167])
-# cma_data_aggregate <- unique(fdat.gid$GID)
-# for(i in 1:dim(cma_data)[2]){
-	# cma_data_aggregate <- cbind(cma_data_aggregate, aggregate(cma_data[,i], by=list(fdat.gid$GID), mean)[,2])
-# }
-# cma_data_aggregate <- as.data.frame(cma_data_aggregate)
-# names(cma_data_aggregate) <- c("GID", names(cma_data))
-
-# cma_data_aggregate$CMA <- ifelse(cma_data_aggregate$CMA==0.5, "medium", ifelse(cma_data_aggregate$CMA>0.5, "high", "low"))
-# cma.rf <- randomForest((CMA) ~ ., data=cma_data_aggregate, importance=TRUE, proximity=TRUE)
-
 # BART prediction
 library(BayesTree)
 load("GEOdata.RData")
