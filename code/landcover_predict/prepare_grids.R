@@ -7,14 +7,14 @@ library(raster) # for handling raster maps
 
 # covariates interested   
 
-gtiffolder <- "../../../GEOdata/ET_1k_Gtif_CMA/"
+gtiffolder <- "../../../GEOdata/ET_Gtiff_251013/"
 # covariates interested   
-grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "pred_grid_1K.tif"]
+grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "fPAR_mask.tif"]
 grid.list.loc <- paste(gtiffolder, grid.list, sep="")
 
 
 
-predict_grid_1k_tif <- readGDAL(paste(gtiffolder, "/", "pred_grid_1K.tif", sep=""), silent=TRUE)
+predict_grid_1k_tif <- readGDAL(paste(gtiffolder, "/", "fPAR_mask.tif", sep=""), silent=TRUE)
 
 predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)
 
@@ -74,7 +74,7 @@ predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_gr
 predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
 predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
 
-write.table(predict_grid_1k_values.narm, paste(gtiffolder, "predcov.txt", sep=""), row.names=FALSE, quote=FALSE, col.names=FALSE)
+
 save.image("GEOdata.RData")
 
 

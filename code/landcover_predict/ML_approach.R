@@ -33,9 +33,9 @@ fdat <- cbind(fdat, fdat.laea)
 # get all the neighoring grid locations
 locations_gid <- matrix(NA, dim(fdat.laea)[1], 18)
 
-gtiffolder <- "../../../GEOdata/ET_1k_Gtif_CMA/"
+gtiffolder <- "../../../GEOdata/ET_Gtiff_251013/"
 # covariates interested   
-grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "pred_grid_1K.tif"]
+grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "fPAR_mask.tif"]
 grid.list.loc <- paste(gtiffolder, grid.list, sep="") 
 
 # read in the prediction grids, and attach covariates in it
@@ -89,7 +89,7 @@ cma_data <- cbind(CMA= fdat$CULTIVATION, fdat[, (6:(dim(fdat)[2]))])
 cma_data <- na.omit(cma_data)
 # BART prediction
 library(BayesTree)
-load("LC.RData")
+load("GEOdata.RData")
 
 x <- cma_data[,-1]
 y <- cma_data[,1]
