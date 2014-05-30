@@ -5,37 +5,39 @@ library(gstat)
 
 # get cv results
 source("getcvresults.R")
-
-soil_property <- "Fe"
-
-cv_results <- results25.sse[results25.sse[,1]==soil_property, ]
-ntree.est <- 25
-sigdf.est <- as.numeric(cv_results[2])
-sigquant.est <- as.numeric(cv_results[3])
-k.est <- as.numeric(cv_results[4])
-
-
-
-# estimate linear model
-covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
-X_lm <- t(do.call("rbind", lab_field.laea@data[, names(lab_field.laea@data)%in%covariates.names]))
-Y_lm <-  lab_field.laea[soil_property]@data[[1]]
-lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
-X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
-Y_lm <- lab_field.laea[soil_property]@data[[1]]
-Y_lm <- log(Y_lm)
-
-
 # prepare prediction covariates with no missing data
 source("bartfunc.R")
 source("makeind.R")
-
 dyn.load("src/mbart.so")
 
-setwd("MCMC_results")
-
-
-bart.est <- bart_saveresults(X_lm, Y_lm, sigdf=sigdf.est, sigquant=sigquant.est, k=k.est, ntree=ntree.est, ndpost=500, nskip=10000, keepevery=10)
+for(soil_property in results25.sse[,1]){
+	print(paste("estimating", soil_property))
+	cv_results <- results25.sse[results25.sse[,1]==soil_property, ]
+	ntree.est <- 25
+	sigdf.est <- as.numeric(cv_results[2])
+	sigquant.est <- as.numeric(cv_results[3])
+	k.est <- as.numeric(cv_results[4])
+	
+	# estimate linear model
+	covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
+	X_lm <- t(do.call("rbind", lab_field.laea@data[, names(lab_field.laea@data)%in%covariates.names]))
+	Y_lm <-  lab_field.laea[soil_property]@data[[1]]
+	lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
+	X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
+	Y_lm <- lab_field.laea[soil_property]@data[[1]]
+	Y_lm <- log(Y_lm)
+	
+	mcmcresults_dir <- paste("MCMCresults_", soil_property, sep="")
+			if(file.exists(mcmcresults_dir)){
+			    setwd(mcmcresults_dir)
+			}else{
+			    dir.create(mcmcresults_dir)
+			    setwd(mcmcresults_dir)
+	        }
+	
+	bart.est <- bart_saveresults(X_lm, Y_lm, sigdf=sigdf.est, sigquant=sigquant.est, k=k.est, ntree=ntree.est, ndpost=500, nskip=10000, keepevery=10)
+	setwd(..)
+}
 
 # bart prediction
 xdat.dir <- paste("../../../../GEOdata.git/ET_1k_Gtif/", "predcov.txt", sep="")

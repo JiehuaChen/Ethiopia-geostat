@@ -9,7 +9,7 @@ fieldfolder <- "../../../Fielddata/"
 
 load("LC.RData")
 
-fdat <- read.table(paste(fieldfolder, "ET_field_data.csv", sep=""), header=T, sep=",")
+fdat <- read.table(paste(fieldfolder, "LDSF_field_data.csv", sep=""), header=T, sep=",")
 
 ### Define grid "coordinate reference system" (CRS)
 # e.g. project to Africa LAEA
@@ -87,7 +87,7 @@ for(j in 1:9){
 }
 
 # predict CMA
-ratio_data <- cbind(fdat.gid$DR30/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
+ratio_data <- cbind(fdat.gid$VSSE/4, fdat.gid[, (dim(fdat)[2]+2):(dim(fdat.gid)[2])])
 ratio_data <- na.omit(ratio_data)
 
 # load prediction data
@@ -99,6 +99,11 @@ library(BayesTree)
 
 x <- ratio_data[,-1]
 y <- ratio_data[,1]
+
+sigdf_cv = 3
+k_cv= 5
+sigquant_cv = 0.9
+ntree_cv = 70
 
 bart.est <- bart(x, y, x.test = as.data.frame( predict_grid_1k_values.narm), ndpost=500, nskip=2000, keepevery=10)
 

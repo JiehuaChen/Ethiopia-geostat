@@ -254,7 +254,7 @@ int main(int argc, char **argv)
 	for (int i = 0; i < V; i++) A[i].resize(F);
 	for (int i = 0; i < F; i++) {
 		for (int j = 0; j < V; j++) {
-			A[j][i] = prediction_matrix[i][j];
+			A[j][i] = exp(prediction_matrix[i][j]);
 		}
 	}
 

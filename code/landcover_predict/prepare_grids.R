@@ -7,16 +7,16 @@ library(raster) # for handling raster maps
 
 # covariates interested   
 
-gtiffolder <- "../../../GEOdata/ET_Gtiff_251013/"
+gtiffolder <- "../../../GEOdata/AF_grids/"
 # covariates interested   
 grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "fPAR_mask.tif"]
 grid.list.loc <- paste(gtiffolder, grid.list, sep="")
 
 
 
-predict_grid_1k_tif <- readGDAL(paste(gtiffolder, "/", "fPAR_mask.tif", sep=""), silent=TRUE)
+predict_grid_1k_tif <- readGDAL("/data6/EthiopiaData/GEOdata/ET_1K_Gtif_20131223/fPAR_mask.tif", silent=TRUE)
 
-predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)
+predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[!is.na(predict_grid_1k_tif@data$band1), ]
 
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
@@ -24,10 +24,9 @@ predict_grid_1k <- SpatialPointsDataFrame(
     mask = rep(1, dim(predict_grid_1k_coords)[1]))
 )
 
-nm <- grid.list.loc[1]
 
 #raster fileinfo
-tif.info <- GDALinfo(nm, silent=TRUE)
+tif.info <- GDALinfo("/data6/EthiopiaData/GEOdata/ET_1K_Gtif_20131223/fPAR_mask.tif", silent=TRUE)
 totalrows <- tif.info[1]
 totalcols <- tif.info[2]
 bandsnum <- tif.info[3]
@@ -41,32 +40,35 @@ if(attr(tif.info, "ysign")==-1){
 	origin.y <- tif.info[5]	
 }
 	
-pixeln.x <- ceiling((predict_grid_1k@coords[,1]-origin.x)/res.x)-1
-pixeln.y <- ceiling((origin.y-predict_grid_1k@coords[,2])/res.y)-1
+pixeln.x <- ceiling((predict_grid_1k_coords[,1]-origin.x)/res.x)-1
+pixeln.y <- ceiling((origin.y-predict_grid_1k_coords[,2])/res.y)-1
 neighbor.x <- c(-1, 0, 1, -1,0,1, -1, 0, 1)
 neighbor.y <- c(-1, -1, -1, 0, 0, 0, 1, 1, 1)
-pred_locations_gid  <-  matrix(NA, dim(predict_grid_1k@coords)[1], 18)
+pred_locations_gid  <-  matrix(NA, dim(predict_grid_1k_coords)[1], 18)
 
 for(i in 1:9){
 	pred_locations_gid[, (2*i-1)] <- (pixeln.x+neighbor.x[i])*res.x + origin.x + res.x/2
 	pred_locations_gid[, (2*i)] <- origin.y - ((pixeln.y+neighbor.y[i])*res.y + res.y/2)
 }
 colnames(pred_locations_gid) <- c("2nb1x","2nb1y" ,"1nb1x", "1nb1y", "2nb2x", "2nb2y", "1nb2x", "1nb2y","locx", "locy", "1nb3x", "1nb3y", "2nb3x", "2nb3y", "1nb4x", "1nb4y", "2nb4x", "2nb4y")
+
 for(j in 1:9){
-	temp <- cbind(predict_grid_1k$mask, x=pred_locations_gid[, (2*j-1)], y = pred_locations_gid[, (2*j)])
-	temp <- as.data.frame(temp)
-	coordinates(temp) = ~ x+y
- 
+	temp2 <- SpatialPointsDataFrame(
+  	coords = pred_locations_gid[, ((2*j-1):(2*j))],
+   data = data.frame(
+    mask = rep(1, dim(predict_grid_1k_coords)[1]))
+	)
+
 	for (i in 1:length(grid.list)) {
 		print(paste("extracting", grid.list.loc[i]))
 		predict_grid_1k_new <- raster(grid.list.loc[i]) # raster is producing small file size in the memory as compared to readGDAL
-		temp@data[paste(strsplit(grid.list[i], split=".tif")[[1]],substring(colnames(pred_locations_gid)[(2*j-1)],1, 4), sep="_")] <- extract (
+		temp2@data[paste(strsplit(grid.list[i], split=".tif")[[1]],substring(colnames(pred_locations_gid)[(2*j-1)],1, 4), sep="_")] <- extract (
 		  	x = predict_grid_1k_new, # evi data 
-		  	y = temp, # original data
+		  	y = temp2, # original data
 		  	method = "simple"
 		 )
 	}
-	predict_grid_1k <- cbind(predict_grid_1k, temp@data[,-1])
+	predict_grid_1k <- cbind(predict_grid_1k, temp2@data[,-1])
 }
 
 predict_grid_1k_values <- predict_grid_1k[, -(1:3)]

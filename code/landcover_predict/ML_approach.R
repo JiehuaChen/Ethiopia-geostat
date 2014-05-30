@@ -1,7 +1,6 @@
 ########
 # 
 ########
-
 library(proj4)
 library(rgdal)
 library(raster)
@@ -33,9 +32,9 @@ fdat <- cbind(fdat, fdat.laea)
 # get all the neighoring grid locations
 locations_gid <- matrix(NA, dim(fdat.laea)[1], 18)
 
-gtiffolder <- "../../../GEOdata/ET_Gtiff_251013/"
+gtiffolder <- "../../../GEOdata/ET_1K_Gtif_20131223/"
 # covariates interested   
-grid.list <- list.files(gtiffolder, pattern = "\\.tif$")[list.files(gtiffolder, pattern = "\\.tif$")!= "fPAR_mask.tif"]
+grid.list <- list.files(gtiffolder, pattern = "\\.tif$")
 grid.list.loc <- paste(gtiffolder, grid.list, sep="") 
 
 # read in the prediction grids, and attach covariates in it
