@@ -55,7 +55,7 @@ colnames(pred_locations_gid) <- c("2nb1x","2nb1y" ,"1nb1x", "1nb1y", "2nb2x", "2
 for(j in 1:9){
 	temp2 <- SpatialPointsDataFrame(
   	coords = pred_locations_gid[, ((2*j-1):(2*j))],
-   data = data.frame(
+    data = data.frame(
     mask = rep(1, dim(predict_grid_1k_coords)[1]))
 	)
 

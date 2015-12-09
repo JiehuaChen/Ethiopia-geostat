@@ -92,7 +92,7 @@ setwd(map_folder)
 predlogP.new <- krige.P.resi
 gridded(predlogP.new)<-TRUE
 
-
+save.image("bartresults.RData")
 writeGDAL (
   dataset=predlogP.new["mean"],
   fname=paste("bart+rk_",soil_property,"_mean_ppm_20130726.tif", sep=""),

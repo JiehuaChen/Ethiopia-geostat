@@ -1,9 +1,9 @@
 labdata_folder <- "../../../LABdata"
 
 # read in the lab data
-lab <- read.table(paste(labdata_folder,"/Samples.csv", sep=""), header=T, sep=",") # lab data
-field <- read.table(paste(labdata_folder, "/Profiles.csv", sep=""), header=T, sep=",")# field data
-lab_field <- merge(lab, field, by="PID")
+lab_field <- read.table(paste(labdata_folder,"/WoredaChemSelection.txt", sep=""), header=T, sep="\t") # lab data
+# field <- read.table(paste(labdata_folder, "/Profiles.csv", sep=""), header=T, sep=",")# field data
+# lab_field <- merge(lab, field, by="PID")
 
 # project Lat/Lon profile coordinates in to the LAEA CRS of "etgrid"
 coordinates(lab_field) = ~ Lon+Lat # assign coordinates; #proj4string(top.soil) = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")

@@ -1,4 +1,3 @@
-
 relative_error<- function(labdata, covdata, tree.cv){
 	unique_randomseed <- unique(tree.cv[,6])
 	unique_soil_property <- unique(as.character(tree.cv[,1]))

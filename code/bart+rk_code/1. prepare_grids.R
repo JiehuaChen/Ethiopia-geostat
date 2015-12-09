@@ -4,6 +4,17 @@
 suppressPackageStartupMessages(require(rgdal, quietly=TRUE, warn.conflicts=FALSE)) # to import and export spatial data
 suppressPackageStartupMessages(require(raster, quietly =TRUE, warn.conflicts=FALSE)) # for handling raster maps
 
+GID <- function(location){
+    res.pixel <- 1000
+    xgid <- floor(location[,1]/res.pixel)
+    ygid <- floor(location[,2]/res.pixel)
+    gidx <- ifelse(location[,1]<0, paste("W", xgid, sep=""), paste("E", xgid, sep=""))
+    gidy <- ifelse(location[,2]<0, paste("S", ygid, sep=""), paste("N", ygid, sep=""))
+    GID <- paste(gidx, gidy, sep="-")
+    return(list(xgid=xgid, ygid=ygid, GID=GID))
+}
+
+
 # folder contraining all the covariates tif files
 gtiffolder <- "../../../GEOdata/ET_1k_Gtif"
 # covariates interested   
@@ -38,7 +49,8 @@ predict_grid_1k_values.narm <- predict_grid_1k_values[!is.na(rowMeans(predict_gr
 predict_grid_1k_values.narm <- as.matrix(predict_grid_1k_values.narm)
 predict_grid_1k_coords <- predict_grid_1k_coords[!is.na(rowMeans(predict_grid_1k_values)), ]
 
-write.table(predict_grid_1k_values.narm, "predcov.txt", row.names=FALSE, quote=FALSE, col.names=FALSE)
+predict_grid_1k_GID <- GID(predict_grid_1k_coords)
+predict_grid_1k_values_withGID  <- data.frame(GID = predict_grid_1k_GID[[3]], predict_grid_1k_values.narm)
 
 
 
