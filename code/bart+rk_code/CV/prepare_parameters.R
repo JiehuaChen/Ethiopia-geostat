@@ -1,7 +1,7 @@
 soil.property = c("N","P","S","K","Ca","Mg","SOC", "pH")
 sigdf.quant.cv= matrix(c(3, 3, 10, 0.90, 0.99, 0.75), 3, 2)
 k.cv = c(1, 2, 3, 5)
-ntree.cv = seq(5, 100, by=20)
+ntree.cv = seq(10, 100, by=20)
 ncv <- 50
 random.seed = ceiling(runif(ncv, 0, 100000))
 
@@ -26,4 +26,6 @@ meshgrid <- function(parameters.cv.list){
 	return(temp)	
 }
 
+cv_parameters <- meshgrid(parameters.cv.list)
+write.table(cv_parameters, "cv_parameters.txt", sep=",", row.names=FALSE, col.names=FALSE, quote=FALSE)
 
