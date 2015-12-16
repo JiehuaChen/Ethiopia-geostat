@@ -1,13 +1,12 @@
 # preexisted data: 
-library(BayesTree)
 library(gstat)
 library(rbart)
 
 
-soil_property <- "Ca"
+soil_property <- "V0"
 
 # get cv results
-source("getcvresults.R")
+source("getcvresults_nb.R")
 # prepare prediction covariates with no missing data
 
 
@@ -16,7 +15,7 @@ num_draw <- 50
 
 print(paste("estimating", soil_property))
 cv_results <- results25.sse[results25.sse[,1]==soil_property, ]
-ntree.est <- 25
+ntree.est <- as.numeric(cv_results[5])
 sigdf.est <- as.numeric(cv_results[2])
 sigquant.est <- as.numeric(cv_results[3])
 k.est <- as.numeric(cv_results[4])
@@ -25,10 +24,10 @@ k.est <- as.numeric(cv_results[4])
 covariates.names <- do.call("rbind",strsplit(grid.list, split=".tif"))
 X_lm <- t(do.call("rbind", lab_field.laea@data[, names(lab_field.laea@data)%in%covariates.names]))
 Y_lm <-  lab_field.laea[soil_property]@data[[1]]
-lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
-X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm)&Y_lm>0, ]
+lab_field.laea <- lab_field.laea[!is.na(rowMeans(X_lm)+Y_lm), ]
+X_lm <- X_lm[!is.na(rowMeans(X_lm)+Y_lm), ]
 Y_lm <- lab_field.laea[soil_property]@data[[1]]
-Y_lm <- log(Y_lm)
+Y_lm <- Y_lm
 
 mcmcresults_dir <- paste("MCMCresults_", soil_property, sep="")
 if(file.exists(mcmcresults_dir)){
@@ -89,8 +88,7 @@ krige.P.resi$variance.resi<- krige.P.resi$var1.var
 
 predlogP <- bart_prediction_mean +krige.P.resi$pred.resi
 # change to original value
-krige.P.resi$RKpred_log <- predlogP
-krige.P.resi$RKpred<-exp(predlogP)
+krige.P.resi$RKpred<- predlogP
 
 # to understand the variance of prediction, we can see lower and upper limits of prediction as alternative of variance map (var1.var)
 alpha<-0.05 # this is 95% confidence level.
@@ -98,8 +96,8 @@ loglower<-predlogP - qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(bart_prediction_sd^2+ k
 logupper<-predlogP + qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(bart_prediction_sd^2+ krige.P.resi$var1.var)
 
 #compute the variance of the regression+kriging prediction error by adding the regression prediction error variance and the kriging variace of the residuals
-krige.P.resi$RKlower<-exp(loglower)
-krige.P.resi$RKupper<-exp(logupper)
+krige.P.resi$RKlower<- loglower
+krige.P.resi$RKupper<-  logupper
 krige.P.resi$se_log <- sqrt(bart.predict.sd^2+ krige.P.resi$var1.var)
 
 map_folder <- "../map_results/"

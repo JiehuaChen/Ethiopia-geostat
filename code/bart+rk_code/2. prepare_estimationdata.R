@@ -1,7 +1,7 @@
 labdata_folder <- "../../../LABdata"
 
 # read in the lab data
-lab_field <- read.table(paste(labdata_folder,"/WoredaChemSelection.txt", sep=""), header=T, sep="\t") # lab data
+lab_field <- read.csv(paste(labdata_folder,"/etm3.csv", sep="")) # lab data
 # field <- read.table(paste(labdata_folder, "/Profiles.csv", sep=""), header=T, sep=",")# field data
 # lab_field <- merge(lab, field, by="PID")
 

@@ -30,7 +30,7 @@ predict_grid_1k_coords <- coordinates(predict_grid_1k_tif)[c(predict_grid_1k_tif
 predict_grid_1k <- SpatialPointsDataFrame(
   coords = predict_grid_1k_coords,
   data = data.frame(
-    mask = rep(1, dim(predict_grid_1k_coords)[1]))
+  mask = rep(1, dim(predict_grid_1k_coords)[1]))
 )
   
 # use 'raster' to read a geotif from disk

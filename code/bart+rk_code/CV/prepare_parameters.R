@@ -1,8 +1,8 @@
-soil.property = c("N","P","S","K","Ca","Mg","SOC", "pH")
+soil.property = c("V0", "V3", "V4", "V5", "V6")
 sigdf.quant.cv= matrix(c(3, 3, 10, 0.90, 0.99, 0.75), 3, 2)
 k.cv = c(1, 2, 3, 5)
 ntree.cv = seq(10, 100, by=20)
-ncv <- 50
+ncv <- 10
 random.seed = ceiling(runif(ncv, 0, 100000))
 
 parameters.cv.list <- list(as.matrix(soil.property), as.matrix(sigdf.quant.cv), as.matrix(k.cv), as.matrix(ntree.cv), as.matrix(random.seed))

@@ -8,7 +8,7 @@ relative_error<- function(totaldata, tree.cv){
 		X <- totaldata[, 18:45]
 		Y.temp <- Y[!is.na(rowMeans(cbind(Y, X)))]
 		X <- X[!is.na(rowMeans(cbind(Y, X))), ]
-		Y <- log(Y.temp)
+		Y <- Y.temp
 		for(j in 1:length(unique_randomseed)){
 			set.seed(unique_randomseed[j])
 			sizetest <- ceiling(length(Y)/nfolder)
