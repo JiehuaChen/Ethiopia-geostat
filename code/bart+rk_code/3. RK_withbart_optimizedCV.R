@@ -1,5 +1,4 @@
 # preexisted data: 
-library(BayesTree)
 library(gstat)
 library(rbart)
 
@@ -122,7 +121,7 @@ writeGDAL (
            type="Float32")
 
 writeGDAL (
-           dataset=predlogP.new["RKpred"],/
+           dataset=predlogP.new["RKpred"],
            fname=paste("bart+rk_",soil_property,"_mean_ppm_20130726.tif", sep=""),
            drivername= "GTiff",
            type="Float32")
