@@ -20,7 +20,6 @@ glist <- list.files(pattern="tif", full.names=T)
 grids <- stack(glist)
 
 # Download survey data
-download("https://www.dropbox.com/s/lcf7pokqkqludck/ET_Mehlich3.zip?dl=0", "ET_Mehlich3.zip", mode="wb")
 unzip("ET_Mehlich3.zip", overwrite=T)
 prof <- read.table("Profiles.csv", header=T, sep=",") ## survey locations and Woreda names
 samp <- read.table("Samples.csv", header=T, sep=",") ## sample data
