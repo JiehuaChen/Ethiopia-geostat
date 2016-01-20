@@ -31,7 +31,5 @@ ilrInv_nonorthonormal_stack <- function(idata_stack, V){
 }
 
 
-# In[ ]:
-
 
 
