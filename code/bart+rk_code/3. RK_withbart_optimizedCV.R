@@ -72,7 +72,7 @@ str(vgmf.P.resi.exp) #"SSErr"= num 1.25e-06  --> is the better fit model
 predict_grid_1k_coords <- as.data.frame(predict_grid_1k_coords)
 coordinates(predict_grid_1k_coords) =~x+y
 proj4string(predict_grid_1k_coords) = CRS(proj4string(lab_field.laea)) 
-krige.P.resi<- krige(bart.resi ~1, lab_field.laea, newdata=predict_grid_1k_coords, model = vgmf.P.resi.exp, nmax = 100, beta=0, na.action=na.omit)
+krige.P.resi<- krige(bart.resi ~1, lab_field.laea, newdata=lab_field.laea, model = vgmf.P.resi.exp, nmax = 100, beta=0, na.action=na.omit)
 
 
 #Copy the kriging results to the SpatialPixelsDataFrame map_prediction
@@ -99,7 +99,7 @@ logupper<-predlogP + qnorm(p=1-alpha/2,mean=0,sd=1)*sqrt(bart_prediction_sd^2+ k
 #compute the variance of the regression+kriging prediction error by adding the regression prediction error variance and the kriging variace of the residuals
 krige.P.resi$RKlower<-exp(loglower)
 krige.P.resi$RKupper<-exp(logupper)
-krige.P.resi$se_log <- sqrt(bart.predict.sd^2+ krige.P.resi$var1.var)
+krige.P.resi$se_log <- sqrt(bart_prediction_sd^2+ krige.P.resi$var1.var)
 
 map_folder <- "../map_results/"
 setwd(map_folder)

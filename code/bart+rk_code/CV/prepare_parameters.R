@@ -1,4 +1,4 @@
-soil.property = c("pH")
+soil.property = c("V1", "V2", "V7")
 sigdf.quant.cv= matrix(c(3, 3, 10, 0.90, 0.99, 0.75), 3, 2)
 k.cv = c(1, 2, 3, 5)
 ntree.cv = seq(10, 100, by=20)

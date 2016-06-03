@@ -21,17 +21,5 @@ if(dim(ids)[1]>0){
 #save(lab_field.laea, file="lab_field.laea.RData")
 
 # extract covariates for lab data locations
-grid.list <- c("BLUE.tif", "BSAn.tif", "BSAs.tif", "BSAv.tif", "CTI.tif", "ELEV.tif", "EVI.tif", "FPAR.tif", "LAI.tif", "LSTd.tif", "LSTn.tif", "MAP.tif", "MAT.tif", "MIR.tif", "NDVI.tif", "NIR.tif", "RED.tif", "RELIEF.tif", "WSAn.tif", "WSAs.tif", "WSAv.tif")
- 
 
-for (i in 1:length(grid.list)) {
-	cat(paste("extracting", grid.list[i], "\n"))
-	rmap_bndry_new <- raster(paste(gtiffolder, "/", grid.list[i], sep=""))
-	lab_field.laea@data[strsplit(grid.list[i], split=".tif")[[1]]] <- extract (
-  	x = rmap_bndry_new, # grid data
-  	y = lab_field.laea, # original data
-  	method = "simple"
-	)
-}
-
-
+lab_field_cov <- extract(tiffiles, lab__field.laea)
