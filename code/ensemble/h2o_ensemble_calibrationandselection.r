@@ -46,9 +46,13 @@ test <- h2o.importFile(path = normalizePath("./EthM3_Val.csv"))
 cov_names <- names(train)[32:length(names(train))]
 
 #### y is the column name of the property for prediction, x is the array of covariate names
-y <- "V0"
+##### logarithm transformation if needed
+
+y <- "P"
 x <- cov_names
 
+train[,y] <- log(train[,y])
+test[,y] <- log(test[,y])
 
 
 ### Define learner and meta learner. 
